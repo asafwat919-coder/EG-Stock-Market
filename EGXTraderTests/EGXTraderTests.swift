@@ -90,3 +90,45 @@ final class SimulatedFeedTests: XCTestCase {
         XCTAssertEqual(store.quotes.count, EGXUniverse.stocks.count)
     }
 }
+
+final class PortfolioStoreTests: XCTestCase {
+    private var defaults: UserDefaults!
+
+    override func setUp() {
+        defaults = UserDefaults(suiteName: "PortfolioStoreTests")
+        defaults.removePersistentDomain(forName: "PortfolioStoreTests")
+    }
+
+    private func quote(_ price: Double) -> Quote {
+        Quote(symbol: "COMI", price: price, previousClose: price, open: price, high: price, low: price,
+              volume: 0, bid: price - 0.05, ask: price + 0.05, updatedAt: Date())
+    }
+
+    func testBuyThenSellUpdatesCashAndHoldings() throws {
+        let store = PortfolioStore(defaults: defaults)
+        try store.placeMarketOrder(symbol: "COMI", side: .buy, quantity: 100, quote: quote(80))
+        let buyNotional = 80.05 * 100
+        XCTAssertEqual(store.cash, PortfolioState.initialCapital - buyNotional - FeeSchedule.fees(for: buyNotional), accuracy: 1e-6)
+        XCTAssertEqual(store.holding("COMI")?.quantity, 100)
+
+        try store.placeMarketOrder(symbol: "COMI", side: .sell, quantity: 100, quote: quote(90))
+        XCTAssertNil(store.holding("COMI"))
+        XCTAssertEqual(store.orders.count, 2)
+        XCTAssertGreaterThan(store.cash, PortfolioState.initialCapital)
+    }
+
+    func testRejectsOversizedOrders() {
+        let store = PortfolioStore(defaults: defaults)
+        XCTAssertThrowsError(try store.placeMarketOrder(symbol: "COMI", side: .buy, quantity: 1_000_000, quote: quote(80)))
+        XCTAssertThrowsError(try store.placeMarketOrder(symbol: "COMI", side: .sell, quantity: 1, quote: quote(80)))
+        XCTAssertThrowsError(try store.placeMarketOrder(symbol: "COMI", side: .buy, quantity: 0, quote: quote(80)))
+        XCTAssertEqual(store.cash, PortfolioState.initialCapital)
+    }
+
+    func testStatePersists() throws {
+        let store = PortfolioStore(defaults: defaults)
+        try store.placeMarketOrder(symbol: "COMI", side: .buy, quantity: 10, quote: quote(80))
+        let reloaded = PortfolioStore(defaults: defaults)
+        XCTAssertEqual(reloaded.holding("COMI")?.quantity, 10)
+    }
+}

@@ -26,7 +26,15 @@ shoot() { # name, appearance, launch args...
 }
 
 shoot 01-markets-dark       dark  -screenshotTab markets
-shoot 02-stock-detail-dark  dark  -screenshotTab markets -screenshotSymbol COMI
-shoot 03-watchlist-dark     dark  -screenshotTab watchlist
-shoot 04-markets-light      light -screenshotTab markets
-shoot 05-stock-detail-light light -screenshotTab markets -screenshotSymbol TMGH
+shoot 02-stock-detail-dark  dark  -screenshotTab markets -screenshotSymbol COMI -demoPortfolio YES
+shoot 03-order-ticket-dark  dark  -screenshotTab markets -screenshotSymbol TMGH -screenshotTicket buy
+shoot 04-portfolio-dark     dark  -screenshotTab portfolio -demoPortfolio YES
+shoot 05-watchlist-dark     dark  -screenshotTab watchlist
+shoot 06-insights-dark      dark  -screenshotTab insights
+shoot 07-markets-light      light -screenshotTab markets
+shoot 08-stock-detail-light light -screenshotTab markets -screenshotSymbol SWDY
+shoot 09-portfolio-light    light -screenshotTab portfolio -demoPortfolio YES
+
+# Scrolled views of the Markets screen (lower sections)
+shoot 10-markets-movers-dark  dark -screenshotTab markets -screenshotScroll movers
+shoot 11-markets-stocks-dark  dark -screenshotTab markets -screenshotScroll stocks

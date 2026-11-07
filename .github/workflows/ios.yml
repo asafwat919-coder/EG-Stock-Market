@@ -5,9 +5,12 @@ name: iOS build
 
 on:
   push:
-    paths-ignore: ["**.md", "preview/**"]
+    paths-ignore: ["**.md", "preview/**", "docs/**"]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write # lets the job commit refreshed screenshots to docs/screenshots
 
 concurrency:
   group: ios-${{ github.ref }}
@@ -49,6 +52,21 @@ jobs:
 
       - name: Screenshots
         run: scripts/screenshots.sh "${{ steps.sim.outputs.udid }}" build/DerivedData/Build/Products/Debug-iphonesimulator/EGXTrader.app screenshots
+
+      - name: Commit screenshots to docs/screenshots
+        if: github.event_name == 'push'
+        run: |
+          mkdir -p docs/screenshots
+          rm -f docs/screenshots/*.png
+          for f in screenshots/*.png; do
+            sips -Z 1200 "$f" --out "docs/screenshots/$(basename "$f")" >/dev/null
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A docs/screenshots
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -q -m "Update app screenshots [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}" || echo "::warning::Branch moved on; screenshots not pushed"
 
       - name: Package Simulator build
         run: |

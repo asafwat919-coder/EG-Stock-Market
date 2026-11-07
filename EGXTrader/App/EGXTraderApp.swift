@@ -4,6 +4,7 @@ import SwiftUI
 struct EGXTraderApp: App {
     @State private var market = MarketStore()
     @State private var watchlist = WatchlistStore()
+    @State private var portfolio = PortfolioStore()
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
@@ -11,7 +12,11 @@ struct EGXTraderApp: App {
             RootView()
                 .environment(market)
                 .environment(watchlist)
+                .environment(portfolio)
                 .tint(Theme.gold)
+                .onAppear {
+                    if LaunchOptions.demoPortfolio { portfolio.seedDemo(using: market) }
+                }
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active { market.start() } else { market.stop() }
@@ -32,30 +37,14 @@ struct RootView: View {
             WatchlistView()
                 .tabItem { Label("Watchlist", systemImage: "star.fill") }
                 .tag(Tab.watchlist)
-            ComingSoonView(title: "AI Insights", systemImage: "sparkles",
-                           detail: "Buy / hold / sell ratings with explained factors and the AI analyst chat.")
+            InsightsTeaserView()
                 .tabItem { Label("Insights", systemImage: "sparkles") }
                 .tag(Tab.insights)
-            ComingSoonView(title: "Portfolio", systemImage: "briefcase.fill",
-                           detail: "Paper trading with EGP 250,000 virtual capital, realistic EGX fees and order history.")
-                .tabItem { Label("Portfolio", systemImage: "briefcase.fill") }
+            PortfolioView()
+                .tabItem { Label("Portfolio", systemImage: "chart.pie.fill") }
                 .tag(Tab.portfolio)
         }
-    }
-}
-
-struct ComingSoonView: View {
-    let title: String
-    let systemImage: String
-    let detail: String
-
-    var body: some View {
-        NavigationStack {
-            ContentUnavailableView(title, systemImage: systemImage, description: Text(detail))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Theme.background)
-                .navigationTitle(title)
-        }
+        .sensoryFeedback(.selection, trigger: selection)
     }
 }
 
@@ -73,5 +62,17 @@ enum LaunchOptions {
 
     static var initialSymbol: String? {
         UserDefaults.standard.string(forKey: "screenshotSymbol")
+    }
+
+    static var initialTicket: OrderSide? {
+        UserDefaults.standard.string(forKey: "screenshotTicket").flatMap(OrderSide.init(rawValue:))
+    }
+
+    static var scrollTarget: String? {
+        UserDefaults.standard.string(forKey: "screenshotScroll")
+    }
+
+    static var demoPortfolio: Bool {
+        UserDefaults.standard.bool(forKey: "demoPortfolio")
     }
 }
