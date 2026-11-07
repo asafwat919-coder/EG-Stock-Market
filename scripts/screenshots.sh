@@ -36,5 +36,6 @@ shoot 08-stock-detail-light light -screenshotTab markets -screenshotSymbol SWDY
 shoot 09-portfolio-light    light -screenshotTab portfolio -demoPortfolio YES
 
 # Scrolled views of the Markets screen (lower sections)
-shoot 10-markets-movers-dark  dark -screenshotTab markets -screenshotScroll movers
-shoot 11-markets-stocks-dark  dark -screenshotTab markets -screenshotScroll stocks
+shoot 10-markets-pulse-dark   dark -screenshotTab markets -screenshotScroll pulse
+shoot 11-markets-movers-dark  dark -screenshotTab markets -screenshotScroll movers
+shoot 12-markets-stocks-dark  dark -screenshotTab markets -screenshotScroll stocks

@@ -3,6 +3,15 @@
 iOS app for trading on the Egyptian Exchange (EGX) with AI buy/hold/sell recommendations.
 SwiftUI, iOS 17+. Status: **work in progress**.
 
+## Screenshots
+
+Captured automatically by CI in the iOS Simulator on every push (`docs/screenshots/`).
+
+| Markets | Stock detail | Order ticket | Portfolio |
+| --- | --- | --- | --- |
+| <img src="docs/screenshots/01-markets-dark.png" width="200"> | <img src="docs/screenshots/02-stock-detail-dark.png" width="200"> | <img src="docs/screenshots/03-order-ticket-dark.png" width="200"> | <img src="docs/screenshots/04-portfolio-dark.png" width="200"> |
+| <img src="docs/screenshots/07-markets-light.png" width="200"> | <img src="docs/screenshots/08-stock-detail-light.png" width="200"> | <img src="docs/screenshots/05-watchlist-dark.png" width="200"> | <img src="docs/screenshots/09-portfolio-light.png" width="200"> |
+
 ## Building without a Mac
 
 iOS apps can only be compiled on macOS, so this repo uses **GitHub-hosted Macs** instead of a local one:
@@ -46,8 +55,8 @@ Needs a paid Apple Developer Program membership (USD 99/year). Everything else h
 | --- | --- |
 | `project.yml` | XcodeGen spec (app + unit test targets, iOS 17+, Info.plist keys) |
 | `EGXTrader/App/` | App entry point, tab bar, screenshot launch options |
-| `EGXTrader/Stores/` | `@Observable` MarketStore (live ticks, indices, breadth, movers, sectors) and WatchlistStore |
-| `EGXTrader/Features/` | Markets, Stock Detail (Swift Charts, key stats), Watchlist, shared components |
+| `EGXTrader/Stores/` | `@Observable` MarketStore (live ticks, indices, breadth, movers, sectors), WatchlistStore, PortfolioStore (paper trading) |
+| `EGXTrader/Features/` | Markets, Stock Detail, Order Ticket, Portfolio, Watchlist, Insights teaser, shared components |
 | `EGXTrader/DesignSystem/` | Colors, typography and number/date formatters (dark ink + gold theme, light mode too) |
 | `EGXTrader/Models/` | Stocks, quotes, candles, indices, orders, holdings, fee schedule, AI recommendation types |
 | `EGXTrader/Data/` | EGX universe (30 companies), Cairo trading calendar (Sun–Thu, 10:00–14:30), seeded RNG, simulated market feed |
@@ -61,8 +70,8 @@ Live preview: https://claude.ai/artifact/DJXvDLeVuwgxRuweJgd53e (private to the 
 ## Still to do (iOS)
 
 1. `AI/` – technical indicators + recommendation engine (port from the JS in the preview), Claude API client for the AI Analyst chat (raw HTTP streaming, API key in Keychain)
-2. `Stores/` – PortfolioStore, SettingsStore
-3. `Features/` – AI Insights + chat, Order Ticket (Face ID confirm), Portfolio, Profile, Onboarding
+2. `Stores/` – SettingsStore; limit orders
+3. `Features/` – AI Insights + chat, Face ID order confirmation, Profile, Onboarding
 
 ## Notes
 

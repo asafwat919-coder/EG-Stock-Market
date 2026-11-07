@@ -273,9 +273,14 @@ struct PriceChart: View {
         .chartXSelection(value: $selectedDate)
         .chartYScale(domain: (low - padding)...(high + padding))
         .chartXAxis {
-            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
-                AxisValueLabel(format: showsTime ? .dateTime.hour().minute() : .dateTime.month(.abbreviated).year(.twoDigits))
-                    .foregroundStyle(Theme.textTertiary)
+            AxisMarks(values: .automatic(desiredCount: 4)) { value in
+                AxisValueLabel {
+                    if let date = value.as(Date.self) {
+                        // Format explicitly in Cairo time; the chart's own formatter uses the device zone.
+                        Text(showsTime ? Fmt.time(date) : Fmt.monthYear(date))
+                            .foregroundStyle(Theme.textTertiary)
+                    }
+                }
             }
         }
         .chartYAxis {
@@ -321,8 +326,8 @@ private struct PositionCard: View {
         let gain = value - holding.costBasis
         let gainPercent = holding.costBasis == 0 ? 0 : gain / holding.costBasis * 100
         HStack(spacing: 0) {
-            StatTile(title: "Your shares", value: Fmt.integer(holding.quantity))
-            StatTile(title: "Market value", value: Fmt.compact(value))
+            StatTile(title: "Shares", value: Fmt.integer(holding.quantity))
+            StatTile(title: "Value", value: Fmt.compact(value))
             StatTile(title: "Return", value: Fmt.percent(gainPercent), tint: Theme.trend(gain))
         }
         .cardStyle()

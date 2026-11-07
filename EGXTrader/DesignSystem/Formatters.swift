@@ -36,6 +36,13 @@ enum Fmt {
         return f
     }()
 
+    private static let monthYearFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MMM ''yy"
+        f.timeZone = MarketClock.cairo
+        return f
+    }()
+
     private static let dateTimeFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "d MMM, HH:mm"
@@ -84,5 +91,6 @@ enum Fmt {
 
     static func time(_ date: Date) -> String { timeFormatter.string(from: date) }
     static func day(_ date: Date) -> String { dayFormatter.string(from: date) }
+    static func monthYear(_ date: Date) -> String { monthYearFormatter.string(from: date) }
     static func dateTime(_ date: Date) -> String { dateTimeFormatter.string(from: date) }
 }
