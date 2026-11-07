@@ -1,0 +1,72 @@
+# Builds and tests the iOS app on a GitHub-hosted Mac, then takes Simulator
+# screenshots. This is how the app is developed without owning a Mac: every push
+# is compiled here, and the screenshots + Simulator build appear as artifacts.
+name: iOS build
+
+on:
+  push:
+    paths-ignore: ["**.md", "preview/**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tools
+        run: |
+          xcodebuild -version
+          command -v xcodegen  || brew install xcodegen
+          command -v xcbeautify || brew install xcbeautify
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Pick an iPhone simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 scripts/pick_simulator.py)
+          echo "Using simulator $UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Build and run unit tests
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project EGXTrader.xcodeproj -scheme EGXTrader \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build/DerivedData \
+            -resultBundlePath build/TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify --renderer github-actions
+
+      - name: Screenshots
+        run: scripts/screenshots.sh "${{ steps.sim.outputs.udid }}" build/DerivedData/Build/Products/Debug-iphonesimulator/EGXTrader.app screenshots
+
+      - name: Package Simulator build
+        run: |
+          cd build/DerivedData/Build/Products/Debug-iphonesimulator
+          zip -qry "$GITHUB_WORKSPACE/EGXTrader-simulator.zip" EGXTrader.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EGXTrader-simulator-app
+          path: EGXTrader-simulator.zip
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results
+          path: build/TestResults.xcresult
